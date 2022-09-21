@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-rest-generator"
+description = "Generates an SDK for a Django Rest Framework rest server."
+authors = [
+    { name = "SQA Team", email = "solutionsqa@canonical.com" }
+]
+
+readme = "README.md"
+requires-python = ">=3.8"
+
+dynamic = ["version"]
+
+dependencies = [
+    "requests==2.28.1",
+    "openapi3-parser==1.1.4"
+]
+
+[project.optional-dependencies]
+tests = [
+  'coverage',
+  'pytest',
+  'flake8',
+]
+
+
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+
+[tool.setuptools_scm]
