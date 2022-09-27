@@ -38,6 +38,7 @@ dependencies = [
 tests = [
   'coverage',
   'pytest',
+  'pytest-cov',
   'flake8',
 ]
 
@@ -46,6 +47,14 @@ tests = [
 [tool.pytest.ini_options]
 addopts = [
     "--import-mode=importlib",
+    "--cov=django-rest-generator",
+    "--cov-branch",
+    "--cov-report=term:skip-covered",
+    "--cov-report=xml:.coverage.xml"
 ]
+testpaths = [
+    "tests",
+]
+
 
 [tool.setuptools_scm]
