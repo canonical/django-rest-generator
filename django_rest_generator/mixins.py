@@ -53,9 +53,15 @@ class CreateableAPIResourceMixin:
 
 class UpdateableAPIResourceMixin:
     @classmethod
-    def update(cls, object_id: Toid, data: Optional[dict] = None, params: Optional[TParams] = None) -> APIResponse:
+    def update(
+        cls,
+        object_id: Toid,
+        data: Optional[dict] = None,
+        params: Optional[TParams] = None,
+    ) -> APIResponse:
         url = cls.instance_url(object_id)
         return cls._request("PUT", url=url, json=data, params=params)
+
 
 class PartiallyUpdateableAPIResourceMixin:
     @classmethod

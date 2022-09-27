@@ -12,3 +12,19 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import pytest
+from django_rest_generator.utils import sanitize_endpoint_to_method_name
+
+
+@pytest.mark.parametrize(
+    "test_input, expected",
+    [
+        pytest.param("api/v2/bugs", "api.v2.bugs"),
+        pytest.param("api/v2/projects/", "api.v2.projects"),
+        pytest.param("/api/v2/bugs/", ".api.v2.bugs"),
+        pytest.param("api/v2/hot-bugs/", "api.v2.hot-bugs"),
+    ],
+)
+def test_sanitize_endpoint_to_method_name(test_input, expected):
+    assert sanitize_endpoint_to_method_name(test_input) == expected

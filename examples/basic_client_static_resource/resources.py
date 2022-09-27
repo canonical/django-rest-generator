@@ -15,17 +15,16 @@
 
 from typing import Optional
 
-from django_rest_client import (
+from django_rest_generator.mixins import (
     RetrievableAPIResourceMixin,
     ListableAPIResourceMixin,
     PaginationAPIResourceMixin,
     DeletableAPIResourceMixin,
     UpdateableAPIResourceMixin,
-    SingletonAPIResourceMixin,
 )
-from django_rest_client.types import Toid, TParams
-from weeblclient.weeblclient.v2.lib.api_resource import APIResource
-from weeblclient.weeblclient.v2.lib.api_response import APIResponse
+from django_rest_generator.types import Toid, TParams
+from django_rest_generator.response import APIResponse
+from django_rest_generator.resource import APIResource
 
 
 class SiloResource(

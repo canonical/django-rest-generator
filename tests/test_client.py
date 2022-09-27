@@ -14,5 +14,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-def test_mock_test2():
-    assert 2==2
+def test_client_loads_static_resources(client_class_mock, api_token):
+    client = client_class_mock(token=api_token)
+
+    assert hasattr(client, "TestResource")
+    assert hasattr(client.TestResource, "OBJECT_NAME")
+
+
+def test_client_uses_specified_logger(client_class_mock, api_token):
+    import logging
+
+    logger = logging.getLogger("test")
+    client = client_class_mock(token=api_token, logger=logger)
+    assert client._logger == logger

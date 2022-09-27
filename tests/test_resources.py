@@ -13,5 +13,34 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-def test_mock_test():
-    assert 2==2
+import pytest
+
+
+def test_client_resource_generates_correct_class_url(client_class_mock, api_token):
+    client = client_class_mock(token=api_token)
+    assert client.TestResource.class_url() == "api/v2/silos"
+
+
+def test_client_resource_generates_correct_instance_url(client_class_mock, api_token):
+    client = client_class_mock(token=api_token)
+    instance_id = 11
+
+    assert (
+        client.TestResource.instance_url(instance_id) == f"api/v2/silos/{instance_id}/"
+    )
+
+
+def test_client_resource_instance_url_bad_params(client_class_mock, api_token):
+    client = client_class_mock(token=api_token)
+    instance_id = None  # not a string or int
+    with pytest.raises(RuntimeError) as raised_error:
+        client.TestResource.instance_url(instance_id)
+
+    assert "Could not determine which URL to request" in str(raised_error.value)
+
+
+def test_client_resource_class_url_bad_resource(bad_client_class_mock, api_token):
+    client = bad_client_class_mock(token=api_token)
+    with pytest.raises(NotImplementedError) as raised_error:
+        client.TestResource.class_url()
+    assert "You should perform actions on its subclasses" in str(raised_error.value)

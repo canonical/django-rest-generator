@@ -35,7 +35,16 @@ from abc import ABCMeta, abstractmethod
 from typing import Dict, Union, Optional
 import re
 from .utils import sanitize_endpoint_to_method_name
-from .mixins import CreateableAPIResourceMixin, DeletableAPIResourceMixin, ListableAPIResourceMixin, PaginationAPIResourceMixin, PartiallyUpdateableAPIResourceMixin, RetrievableAPIResourceMixin, SingletonAPIResourceMixin, UpdateableAPIResourceMixin
+from .mixins import (
+    CreateableAPIResourceMixin,
+    DeletableAPIResourceMixin,
+    ListableAPIResourceMixin,
+    PaginationAPIResourceMixin,
+    PartiallyUpdateableAPIResourceMixin,
+    RetrievableAPIResourceMixin,
+    SingletonAPIResourceMixin,
+    UpdateableAPIResourceMixin,
+)
 from .response import APIResponse
 from .resource import APIResource
 from .exceptions import APIClientException
@@ -77,7 +86,6 @@ class APIClient(metaclass=ABCMeta):
         for key, klass in self._get_resources_map().items():
             self.register_resource(key, klass)
 
-
     def register_resource(self, atrribute, manager_class):
         manager_class._request = self._request
         self.__setattr__(atrribute, manager_class)
@@ -86,7 +94,7 @@ class APIClient(metaclass=ABCMeta):
     @abstractmethod
     def _server_url(self) -> str:
         raise NotImplementedError()
-    
+
     @property
     @abstractmethod
     def _server_api_base(self) -> str:
@@ -147,21 +155,28 @@ class APIClient(metaclass=ABCMeta):
 
         # flake8: noqa: E731
         is_apiresource = lambda x: inspect.isclass(x) and issubclass(x, APIResource)
-        inst_resources = {key: value for key, value in inst_attrs.items() if is_apiresource(value)}
-        cls_resources = {key: value for key, value in cls_attrs.items() if is_apiresource(value)}
+        inst_resources = {
+            key: value for key, value in inst_attrs.items() if is_apiresource(value)
+        }
+        cls_resources = {
+            key: value for key, value in cls_attrs.items() if is_apiresource(value)
+        }
         cls_resources.update(inst_resources)
         return cls_resources
-    
+
     @staticmethod
     def _make_resource_class(custom_actions, mixins):
         class DynamicResource(APIResource, *custom_actions, *mixins):
             pass
+
         return DynamicResource
-    
+
     @staticmethod
     def _make_custom_action_class(custom_endpoint, custom_method, custom_detail):
         class DynamicCustomAction:
-            def _run(cls, objectId: Union[str, int] = None, params: Optional[TParams] = None) -> APIResponse:
+            def _run(
+                cls, objectId: Union[str, int] = None, params: Optional[TParams] = None
+            ) -> APIResponse:
                 # Injected dynamically from upper level func
                 method = custom_method
                 detail = custom_detail
@@ -173,13 +188,16 @@ class APIClient(metaclass=ABCMeta):
                 else:
                     base_url = cls.class_url()
 
-                url =  f"{base_url}/{endpoint}"
+                url = f"{base_url}/{endpoint}"
                 return cls._request(method, url=url, params=params)
 
-        setattr(DynamicCustomAction, sanitize_endpoint_to_method_name(custom_endpoint), classmethod(getattr(DynamicCustomAction, "_run")))
+        setattr(
+            DynamicCustomAction,
+            sanitize_endpoint_to_method_name(custom_endpoint),
+            classmethod(getattr(DynamicCustomAction, "_run")),
+        )
         delattr(DynamicCustomAction, "_run")
         return DynamicCustomAction
-
 
     def _parse_resources_from_openapi(self, spec):
         resources = defaultdict(lambda: defaultdict(list))
@@ -187,22 +205,22 @@ class APIClient(metaclass=ABCMeta):
             path_base = path.url.strip().replace(f"/{self._server_api_base}", "")
             path_methods = [x.method.value.upper() for x in path.operations]
             resource, endpoint = path_base.split("/", maxsplit=1)
-            if endpoint == '':
+            if endpoint == "":
                 endpoint = "/"
             resources[resource][endpoint].extend(path_methods)
         return resources
-    
+
     def _build_resource_object(self, resource_name: str, endpoints: dict):
-        is_detail_action = lambda x: re.match(r"{.*}\/",x) is not None
+        is_detail_action = lambda x: re.match(r"{.*}\/", x) is not None
         instance_method_map = {
-            'GET': [RetrievableAPIResourceMixin, SingletonAPIResourceMixin],
-            'PUT': [UpdateableAPIResourceMixin],
-            'DELETE': [DeletableAPIResourceMixin],
-            'PATCH': [PartiallyUpdateableAPIResourceMixin],
+            "GET": [RetrievableAPIResourceMixin, SingletonAPIResourceMixin],
+            "PUT": [UpdateableAPIResourceMixin],
+            "DELETE": [DeletableAPIResourceMixin],
+            "PATCH": [PartiallyUpdateableAPIResourceMixin],
         }
         object_method_map = {
-            'POST': [CreateableAPIResourceMixin],
-            'GET': [ListableAPIResourceMixin, PaginationAPIResourceMixin]
+            "POST": [CreateableAPIResourceMixin],
+            "GET": [ListableAPIResourceMixin, PaginationAPIResourceMixin],
         }
 
         resource_mixins = set()
@@ -216,33 +234,38 @@ class APIClient(metaclass=ABCMeta):
                 # It is an instance/object endpoint
                 for method in methods:
                     resource_mixins.update(instance_method_map[method])
-                    
+
             else:
                 # We are a custom action here
                 # A custom action must only have one method.
                 if len(methods) > 1:
-                    raise Warning(f"Custom action at {resource_name}/{endpoint} has more than the ONE allowed HTTP method: {methods}.")
+                    raise Warning(
+                        f"Custom action at {resource_name}/{endpoint} has more than the ONE allowed HTTP method: {methods}."
+                    )
                 custom_action_name = re.sub(r"{.*}\/", "", endpoint)
-                custom_actions.add(self._make_custom_action_class(custom_action_name, methods[0], is_detail_action(endpoint)))
+                custom_actions.add(
+                    self._make_custom_action_class(
+                        custom_action_name, methods[0], is_detail_action(endpoint)
+                    )
+                )
 
-        resource_class = self._make_resource_class(custom_actions,resource_mixins)
+        resource_class = self._make_resource_class(custom_actions, resource_mixins)
 
         resource_class.OBJECT_NAME = f"{self._server_api_base}{resource_name}"
         return resource_class
-    
+
     def _build_from_openapi_schema(self, schema_file: str = None):
         schema = f"{self._server_url}/{self._open_api_schema_endpoint}"
         if schema_file is not None:
             schema = schema_file
-            
+
         spec = parse(schema)
         resources = self._parse_resources_from_openapi(spec=spec)
-        
+
         for resource, endpoints in resources.items():
             resource_class = self._build_resource_object(resource, endpoints)
-            self.register_resource(resource, resource_class)   
-    
+            self.register_resource(resource, resource_class)
+
     @classmethod
-    def build_from_openapi_schema(cls, schema, token=None):
-        return cls(token=token)._build_from_openapi_schema(schema)
-        
+    def build_from_openapi_schema(cls, schema_file, token=None):
+        return cls(token=token)._build_from_openapi_schema(schema_file)

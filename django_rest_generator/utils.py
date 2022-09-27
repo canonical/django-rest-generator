@@ -13,18 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import List, Dict, Union
-from typing_extensions import Literal, TypedDict
+import re
 
 
-TRequestMethods = Literal["GET", "POST", "PUT", "PATCH", "DELETE"]
-
-Toid = Union[str, int]
-
-
-THeaders = Dict[str, str]
-
-class TParams(TypedDict, total=False):
-    ordering: List[str]
-    page: int
-    page_size: int
+def sanitize_endpoint_to_method_name(endpoint):
+    endpoint = str(endpoint).lower().strip()
+    endpoint = re.sub(r"{.*}\/", "", endpoint)
+    endpoint = endpoint.replace("/", ".")
+    if endpoint.endswith("."):
+        endpoint = endpoint[:-1]
+    return endpoint

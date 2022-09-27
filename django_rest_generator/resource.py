@@ -28,7 +28,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from typing import Callable
 
 from .types import Toid
@@ -48,7 +48,7 @@ class APIResource(metaclass=ABCMeta):
         if cls == APIResource:
             raise NotImplementedError(
                 "APIResource is an abstract class."
-                " You should perform actions on its subclasses."
+                "You should perform actions on its subclasses."
             )
         # Namespaces are separated in object names with periods (.) and in URLs
         # with forward slashes (/), so replace the former with the latter.
@@ -69,4 +69,4 @@ class APIResource(metaclass=ABCMeta):
             )
 
         base = cls.class_url()
-        return f"{base}/{object_id}"
+        return f"{base}/{object_id}/"

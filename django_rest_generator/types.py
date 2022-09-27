@@ -13,6 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import List, Dict, Union, Literal, TypedDict
 
-def test_mock_test3():
-    assert 2==2
+TRequestMethods = Literal["GET", "POST", "PUT", "PATCH", "DELETE"]
+
+Toid = Union[str, int]
+
+
+THeaders = Dict[str, str]
+
+
+class TParams(TypedDict, total=False):
+    ordering: List[str]
+    page: int
+    page_size: int

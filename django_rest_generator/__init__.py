@@ -12,12 +12,3 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-import re
-def sanitize_endpoint_to_method_name(endpoint):
-    endpoint = str(endpoint).lower().strip()
-    endpoint = re.sub(r"{.*}\/", "", endpoint)
-    endpoint = endpoint.replace("/", ".")
-    if endpoint.endswith("."):
-        endpoint = endpoint[:-1]
-    return endpoint
