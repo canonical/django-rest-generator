@@ -30,5 +30,5 @@ header:
     - "**/*.yml"
     - "*requirements.txt"
     - "**/.gitignore"
-    - "django-rest-generator/client.py" # due to having different licensing
-    - "django-rest-generator/resource.py" # due to having different licensing
+    - "django_rest_generator/client.py" # due to having different licensing
+    - "django_rest_generator/resource.py" # due to having different licensing

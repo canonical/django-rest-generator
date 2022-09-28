@@ -25,7 +25,7 @@ authors = [
 ]
 
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 dynamic = ["version"]
 
@@ -60,6 +60,6 @@ testpaths = [
 
 [tool.black]
 line-length = 88
-target-version = ['py38']
+target-version = ['py39']
 
 [tool.setuptools_scm]
