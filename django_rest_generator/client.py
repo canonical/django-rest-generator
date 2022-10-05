@@ -221,6 +221,7 @@ class APIClient(metaclass=ABCMeta):
         object_method_map = {
             "POST": [CreateableAPIResourceMixin],
             "GET": [ListableAPIResourceMixin, PaginationAPIResourceMixin],
+            "DELETE": [DeletableAPIResourceMixin],
         }
 
         resource_mixins = set()
