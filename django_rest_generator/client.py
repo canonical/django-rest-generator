@@ -38,6 +38,7 @@ from .utils import sanitize_endpoint_to_method_name
 from .mixins import (
     CreateableAPIResourceMixin,
     DeletableAPIResourceMixin,
+    DeletableObjectResourceMixin,
     ListableAPIResourceMixin,
     PaginationAPIResourceMixin,
     PartiallyUpdateableAPIResourceMixin,
@@ -221,7 +222,7 @@ class APIClient(metaclass=ABCMeta):
         object_method_map = {
             "POST": [CreateableAPIResourceMixin],
             "GET": [ListableAPIResourceMixin, PaginationAPIResourceMixin],
-            "DELETE": [DeletableAPIResourceMixin],
+            "DELETE": [DeletableObjectResourceMixin],
         }
 
         resource_mixins = set()
