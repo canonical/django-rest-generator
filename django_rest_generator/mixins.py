@@ -75,6 +75,16 @@ class PartiallyUpdateableAPIResourceMixin:
         return cls._request("PATCH", url=url, json=data, params=params)
 
 
+class DeletableObjectResourceMixin:
+    @classmethod
+    def list(
+        cls,
+        params: Optional[TParams] = None,
+    ) -> APIResponse:
+        url = cls.class_url()
+        return cls._request("DELETE", url=url, params=params)
+
+
 class DeletableAPIResourceMixin:
     @classmethod
     def delete(
