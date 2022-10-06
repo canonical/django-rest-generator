@@ -270,7 +270,9 @@ class APIClient(metaclass=ABCMeta):
 
     @classmethod
     def build_from_openapi_schema(cls, schema_file, token=None):
-        return cls(token=token)._build_from_openapi_schema(schema_file)
+        obj = cls(token=token)
+        obj._build_from_openapi_schema(schema_file)
+        return obj
 
 
 class GenericApiClient(APIClient):
