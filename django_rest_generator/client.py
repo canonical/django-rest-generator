@@ -269,3 +269,23 @@ class APIClient(metaclass=ABCMeta):
     @classmethod
     def build_from_openapi_schema(cls, schema_file, token=None):
         return cls(token=token)._build_from_openapi_schema(schema_file)
+
+
+class GenericApiClient(APIClient):
+    def __init__(self, server_url, api_base, schema_endpoint, *args, **kwargs):
+        self.__server_url = server_url
+        self.__server_api_base = api_base
+        self.__open_api_schema_endpoint = schema_endpoint
+        super().__init__(*args, **kwargs)
+
+    @property
+    def _server_url(self) -> str:
+        return self.__server_url
+
+    @property
+    def _server_api_base(self) -> str:
+        return self.__server_api_base
+
+    @property
+    def _open_api_schema_endpoint(self):
+        return self.__open_api_schema_endpoint
