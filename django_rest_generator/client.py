@@ -269,8 +269,17 @@ class APIClient(metaclass=ABCMeta):
             self.register_resource(resource, resource_class)
 
     @classmethod
-    def build_from_openapi_schema(cls, schema_file, token=None):
-        return cls(token=token)._build_from_openapi_schema(schema_file)
+    def build_from_openapi_schema(cls, schema_file: str = None, *args, **kwargs):
+        """Construct a APIClient from a schema
+
+        :param str schema_file: Optional path to a schema file to load
+        :param *args: arguments required for __init__
+        :param **kwargs: arguments required for __init__
+        :returns APIClient: A populated instance of an APICllient
+        """
+        obj = cls(*args, **kwargs)
+        obj._build_from_openapi_schema(schema_file)
+        return obj
 
 
 class GenericApiClient(APIClient):
