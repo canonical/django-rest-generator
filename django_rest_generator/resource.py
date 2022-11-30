@@ -41,6 +41,11 @@ class APIResource(metaclass=ABCMeta):
     OBJECT_NAME: str
 
     @classmethod
+    def make_request(cls, http_method, url, *args, **kwargs):
+        schema = cls.Meta.get_schema(url, http_method)
+        return cls._request(http_method, url=url, return_schema=schema, *args, **kwargs)
+
+    @classmethod
     def class_url(cls):
         """
         :meta private:

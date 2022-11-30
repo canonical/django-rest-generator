@@ -17,6 +17,7 @@ import requests
 import json
 
 from requests.models import CaseInsensitiveDict
+from django_rest_generator.parser.models import Schema
 
 
 class APIResponse(object):
@@ -28,11 +29,12 @@ class APIResponse(object):
     file_name: str
     raw: bytes
 
-    def __init__(self, response: requests.Response) -> None:
+    def __init__(self, response: requests.Response, schema: Schema = None) -> None:
         self._response = response
         self.url = response.url
         self.code = response.status_code
         self.headers = response.headers
+        self._schema = schema
         try:
             self._handle_json_response()
         except json.JSONDecodeError:
@@ -40,6 +42,8 @@ class APIResponse(object):
 
     def _handle_json_response(self) -> None:
         self.data = self._response.json()
+        if self._schema is not None:
+            self.data = self._schema.from_dict(self.data)
 
     def _handle_generic_response(self) -> None:
         content_disposition = self._response.headers.get("Content-Disposition", "")
@@ -50,4 +54,4 @@ class APIResponse(object):
             self.raw = self._response.content
 
     def __repr__(self) -> str:
-        return f'APIResponse("{self.url}", {self.code})'
+        return f'APIResponse({self._schema}, "{self.url}", {self.code})'

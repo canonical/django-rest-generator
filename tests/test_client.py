@@ -17,15 +17,16 @@
 import pytest
 from django_rest_generator.client import APIClient
 
+
 class MockClient(APIClient):
     @property
     def _server_url(self) -> str:
         return super()._server_url
-    
+
     @property
     def _server_api_base(self) -> str:
         return super()._server_api_base
-    
+
 
 def test_client_loads_static_resources(client_class_mock, api_token):
     client = client_class_mock(token=api_token)
@@ -41,6 +42,7 @@ def test_client_uses_specified_logger(client_class_mock, api_token):
     client = client_class_mock(token=api_token, logger=logger)
     assert client._logger == logger
 
+
 def test_client_sets_server_url(client_class_mock, api_token, server_url):
     client = client_class_mock(token=api_token)
     assert client._server_url == server_url
@@ -52,11 +54,13 @@ def test_abstract_client_raises_not_implemented_server_url(api_token):
         # This should raise NotImplemented as our mock class just refers back to the abstract client
         client._server_url
 
+
 def test_abstract_client_raises_not_implemented_server_api_base(api_token):
     client = MockClient(token=api_token)
     with pytest.raises(NotImplementedError):
         # This should raise NotImplemented as our mock class just refers back to the abstract client
         client._server_api_base
+
 
 def test_client_sets_headers_as_dict(client_class_mock, api_token):
     client = client_class_mock(token=api_token)

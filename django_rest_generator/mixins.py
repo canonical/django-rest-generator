@@ -27,7 +27,7 @@ class RetrievableAPIResourceMixin:
         params: Optional[TParams] = None,
     ) -> APIResponse:
         url = cls.instance_url(object_id)
-        return cls._request("GET", url=url, params=params)
+        return cls.make_request("GET", url=url, params=params)
 
 
 class ListableAPIResourceMixin:
@@ -37,7 +37,7 @@ class ListableAPIResourceMixin:
         params: Optional[TParams] = None,
     ) -> APIResponse:
         url = cls.class_url()
-        return cls._request("GET", url=url, params=params)
+        return cls.make_request("GET", url=url, params=params)
 
 
 class CreateableAPIResourceMixin:
@@ -48,7 +48,7 @@ class CreateableAPIResourceMixin:
         params: Optional[TParams] = None,
     ) -> APIResponse:
         url = cls.class_url()
-        return cls._request("POST", url=url, json=data, params=params)
+        return cls.make_request("POST", url=url, json=data, params=params)
 
 
 class UpdateableAPIResourceMixin:
@@ -60,7 +60,7 @@ class UpdateableAPIResourceMixin:
         params: Optional[TParams] = None,
     ) -> APIResponse:
         url = cls.instance_url(object_id)
-        return cls._request("PUT", url=url, json=data, params=params)
+        return cls.make_request("PUT", url=url, json=data, params=params)
 
 
 class PartiallyUpdateableAPIResourceMixin:
@@ -72,7 +72,7 @@ class PartiallyUpdateableAPIResourceMixin:
         params: Optional[TParams] = None,
     ) -> APIResponse:
         url = cls.instance_url(object_id)
-        return cls._request("PATCH", url=url, json=data, params=params)
+        return cls.make_request("PATCH", url=url, json=data, params=params)
 
 
 class DeletableObjectResourceMixin:
@@ -82,7 +82,7 @@ class DeletableObjectResourceMixin:
         params: Optional[TParams] = None,
     ) -> APIResponse:
         url = cls.class_url()
-        return cls._request("DELETE", url=url, params=params)
+        return cls.make_request("DELETE", url=url, params=params)
 
 
 class DeletableAPIResourceMixin:
@@ -93,7 +93,7 @@ class DeletableAPIResourceMixin:
         params: Optional[TParams] = None,
     ) -> APIResponse:
         url = cls.instance_url(object_id)
-        return cls._request("DELETE", url=url, params=params)
+        return cls.make_request("DELETE", url=url, params=params)
 
 
 class PaginationAPIResourceMixin:
@@ -122,7 +122,7 @@ class SingletonAPIResourceMixin:
         params: Optional[TParams] = None,
     ) -> APIResponse:
         url = cls.class_url()
-        return cls._request("GET", url=url, params=params)
+        return cls.make_request("GET", url=url, params=params)
 
     @classmethod
     def class_url(cls) -> str:
