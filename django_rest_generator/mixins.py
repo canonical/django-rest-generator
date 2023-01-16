@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from typing import Tuple, Optional, Generator
-
+from urllib.parse import urlparse, parse_qsl
 from .response import APIResponse
 from .types import Toid, TParams
 
@@ -77,7 +77,7 @@ class PartiallyUpdateableAPIResourceMixin:
 
 class DeletableObjectResourceMixin:
     @classmethod
-    def list(
+    def delete(
         cls,
         params: Optional[TParams] = None,
     ) -> APIResponse:
@@ -106,13 +106,23 @@ class PaginationAPIResourceMixin:
         cls,
         params: Optional[TParams] = None,
     ) -> Generator[Tuple[APIResponse, int], None, None]:
+
         _params = params or {}  # default value
-        response = cls.list(params=dict(_params, page=1))
-        yield response, 1  # yield first page
-        total_pages = response.data.get("total_pages", 1)
-        for page in range(2, total_pages + 1):
-            response = cls.list(params=dict(_params, page=page))
-            yield response, page  # yield subsequent pages
+        has_next = True
+
+        while has_next:
+            response = cls.list(params=dict(_params))
+
+            for item in response.results:
+                yield item
+
+            if response.has_next_url:
+                o = urlparse(response.next_url)
+                next_query_params = parse_qsl(o.query)
+                for param in next_query_params:
+                    _params[param[0]] = param[1]
+            else:
+                has_next = False
 
 
 class SingletonAPIResourceMixin:

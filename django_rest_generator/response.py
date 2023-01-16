@@ -15,7 +15,7 @@
 
 import requests
 import json
-
+from typing import Union
 from requests.models import CaseInsensitiveDict
 from django_rest_generator.parser.models import Schema
 
@@ -52,6 +52,18 @@ class APIResponse(object):
             # case: file attachment
             self.file_name = _split_names[1]
             self.raw = self._response.content
+
+    @property
+    def results(self) -> Union[list, dict]:
+        return self.data["results"]
+
+    @property
+    def next_url(self) -> Union[str, None]:
+        return self.data["next"]
+
+    @property
+    def has_next_url(self) -> bool:
+        return self.next_url is not None
 
     def __repr__(self) -> str:
         return f'APIResponse({self._schema}, "{self.url}", {self.code})'
