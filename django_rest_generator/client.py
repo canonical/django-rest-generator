@@ -176,13 +176,14 @@ class APIClient(metaclass=ABCMeta):
         return DynamicResource
 
     @staticmethod
-    def _make_custom_action_class(custom_endpoint, custom_method, custom_detail):
+    def _make_custom_action_class(custom_endpoint, endpoint_operation, custom_detail):
         class DynamicCustomAction:
             def _run(
                 cls, objectId: Union[str, int] = None, params: Optional[TParams] = None
             ) -> APIResponse:
                 # Injected dynamically from upper level func
-                method = custom_method
+                endpoint_op = endpoint_operation
+                method = endpoint_operation.method
                 detail = custom_detail
                 endpoint = custom_endpoint
 
@@ -193,7 +194,7 @@ class APIClient(metaclass=ABCMeta):
                     base_url = cls.class_url()
 
                 url = f"{base_url}{endpoint}"
-                return cls._request(method, url=url, params=params)
+                return cls.make_request(method, url=url, params=params)
 
         setattr(
             DynamicCustomAction,
