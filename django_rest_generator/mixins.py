@@ -47,7 +47,7 @@ class CreateableAPIResourceMixin:
         data: Optional[dict] = None,
         params: Optional[TParams] = None,
     ) -> APIResponse:
-        url = cls.class_url()
+        url = f"{cls.class_url()}/"
         return cls.make_request("POST", url=url, json=data, params=params)
 
 
