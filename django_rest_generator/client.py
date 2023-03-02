@@ -193,7 +193,7 @@ class APIClient(metaclass=ABCMeta):
                 else:
                     base_url = cls.class_url()
 
-                url = f"{base_url}/{endpoint}/"
+                url = f"{base_url}/{endpoint}"
                 return cls.make_request(method, url=url, params=params)
 
         setattr(
