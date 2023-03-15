@@ -45,6 +45,7 @@ from .mixins import (
     RetrievableAPIResourceMixin,
     SingletonAPIResourceMixin,
     UpdateableAPIResourceMixin,
+    GetOrCreateAPIResourceMixin,
 )
 from .response import APIResponse
 from .resource import APIResource
@@ -222,7 +223,7 @@ class APIClient(metaclass=ABCMeta):
             "PATCH": [PartiallyUpdateableAPIResourceMixin],
         }
         object_method_map = {
-            "POST": [CreateableAPIResourceMixin],
+            "POST": [CreateableAPIResourceMixin, GetOrCreateAPIResourceMixin],
             "GET": [ListableAPIResourceMixin, PaginationAPIResourceMixin],
             "DELETE": [DeletableObjectResourceMixin],
         }

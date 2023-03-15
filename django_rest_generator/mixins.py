@@ -17,6 +17,9 @@ from typing import Tuple, Optional, Generator
 from urllib.parse import urlparse, parse_qsl
 from .response import APIResponse
 from .types import Toid, TParams
+import logging
+
+LOGGER = logging.getLogger(__name__)
 
 
 class RetrievableAPIResourceMixin:
@@ -25,8 +28,10 @@ class RetrievableAPIResourceMixin:
         cls,
         object_id: Toid,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> APIResponse:
         url = cls.instance_url(object_id)
+        logger.debug(f"[retrieve] Making GET request to {url} with parameters {params}")
         return cls.make_request("GET", url=url, params=params)
 
 
@@ -35,8 +40,10 @@ class ListableAPIResourceMixin:
     def list(
         cls,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> APIResponse:
         url = cls.class_url()
+        logger.debug(f"[list] Making GET request to {url} with parameters {params}")
         return cls.make_request("GET", url=url, params=params)
 
 
@@ -46,8 +53,12 @@ class CreateableAPIResourceMixin:
         cls,
         data: Optional[dict] = None,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> APIResponse:
         url = f"{cls.class_url()}/"
+        logger.debug(
+            f"[create] Making POST request to {url} with parameters {params} and data {data}"
+        )
         return cls.make_request("POST", url=url, json=data, params=params)
 
 
@@ -58,8 +69,12 @@ class UpdateableAPIResourceMixin:
         object_id: Toid,
         data: Optional[dict] = None,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> APIResponse:
         url = cls.instance_url(object_id)
+        logger.debug(
+            f"[update] Making PUT request to {url} with parameters {params} and data {data}"
+        )
         return cls.make_request("PUT", url=url, json=data, params=params)
 
 
@@ -70,8 +85,12 @@ class PartiallyUpdateableAPIResourceMixin:
         object_id: Toid,
         data: Optional[dict] = None,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> APIResponse:
         url = cls.instance_url(object_id)
+        logger.debug(
+            f"[partial_update] Making PATCH request to {url} with parameters {params} and data {data}"
+        )
         return cls.make_request("PATCH", url=url, json=data, params=params)
 
 
@@ -80,8 +99,12 @@ class DeletableObjectResourceMixin:
     def delete(
         cls,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> APIResponse:
         url = cls.class_url()
+        logger.debug(
+            f"[delete] Making DELETE request to {url} with parameters {params}"
+        )
         return cls.make_request("DELETE", url=url, params=params)
 
 
@@ -91,8 +114,12 @@ class DeletableAPIResourceMixin:
         cls,
         object_id: Toid,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> APIResponse:
         url = cls.instance_url(object_id)
+        logger.debug(
+            f"[delete] Making DELETE request to {url} with parameters {params}"
+        )
         return cls.make_request("DELETE", url=url, params=params)
 
 
@@ -105,13 +132,15 @@ class PaginationAPIResourceMixin:
     def all(
         cls,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> Generator[Tuple[APIResponse, int], None, None]:
 
         _params = params or {}  # default value
+        logger.debug(f"[all] Getting all object from {cls} with parameters {params}")
         has_next = True
 
         while has_next:
-            response = cls.list(params=dict(_params))
+            response = cls.list(params=dict(_params), logger=logger)
 
             for item in response.results:
                 yield item
@@ -130,8 +159,10 @@ class SingletonAPIResourceMixin:
     def get(
         cls,
         params: Optional[TParams] = None,
+        logger: logging.Logger = LOGGER,
     ) -> APIResponse:
         url = cls.class_url()
+        logger.debug(f"[get] Making GET request to {url} with parameters {params}")
         return cls.make_request("GET", url=url, params=params)
 
     @classmethod
@@ -149,3 +180,25 @@ class SingletonAPIResourceMixin:
     @classmethod
     def instance_url(cls) -> str:
         return cls.class_url()
+
+
+class GetOrCreateAPIResourceMixin:
+    @classmethod
+    def get_or_create(
+        cls,
+        params: TParams,
+        data: dict,
+        logger: Optional[logging.Logger] = LOGGER,
+    ):
+        """Gets the specified item filtering by the `params` key
+        or creates it using the `data` key."""
+        obj = cls.get(params=params, logger=logger)
+
+        if len(obj.results) > 1:
+            raise ValueError("Got more than one object back from request.")
+        elif len(obj.results) < 1:
+            logger.debug("Got no results back from request, creating.")
+            return cls.create(data=data, logger=logger).results
+        else:
+            # It existed so we only return that one.
+            return obj.results[0]
