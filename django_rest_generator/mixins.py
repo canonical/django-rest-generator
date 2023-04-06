@@ -134,7 +134,6 @@ class PaginationAPIResourceMixin:
         params: Optional[TParams] = None,
         logger: logging.Logger = LOGGER,
     ) -> Generator[Tuple[APIResponse, int], None, None]:
-
         _params = params or {}  # default value
         logger.debug(f"[all] Getting all object from {cls} with parameters {params}")
         has_next = True
@@ -198,7 +197,7 @@ class GetOrCreateAPIResourceMixin:
             raise ValueError("Got more than one object back from request.")
         elif len(obj.results) < 1:
             logger.debug("Got no results back from request, creating.")
-            return cls.create(data=data, logger=logger).results
+            return cls.create(data=data, logger=logger).data
         else:
             # It existed so we only return that one.
             return obj.results[0]
