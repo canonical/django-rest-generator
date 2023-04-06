@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Canonical Ltd
+# Copyright (C) 2022-2023 Canonical Ltd
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -91,7 +91,12 @@ class PartiallyUpdateableAPIResourceMixin:
         logger.debug(
             f"[partial_update] Making PATCH request to {url} with parameters {params} and data {data}"
         )
-        return cls.make_request("PATCH", url=url, json=data, params=params)
+        resp = cls.make_request("PATCH", url=url, json=data, params=params)
+        if resp._response.ok:
+            logger.debug("[partial_update] Successful")
+        else:
+            raise ValueError("Partial update failed")
+        return resp
 
 
 class DeletableObjectResourceMixin:
@@ -134,7 +139,6 @@ class PaginationAPIResourceMixin:
         params: Optional[TParams] = None,
         logger: logging.Logger = LOGGER,
     ) -> Generator[Tuple[APIResponse, int], None, None]:
-
         _params = params or {}  # default value
         logger.debug(f"[all] Getting all object from {cls} with parameters {params}")
         has_next = True
@@ -163,7 +167,12 @@ class SingletonAPIResourceMixin:
     ) -> APIResponse:
         url = cls.class_url()
         logger.debug(f"[get] Making GET request to {url} with parameters {params}")
-        return cls.make_request("GET", url=url, params=params)
+        obj = cls.make_request("GET", url=url, params=params)
+        if len(obj.results) > 1:
+            raise ValueError("Got more than one object back from request.")
+        elif len(obj.results) < 1:
+            return None
+        return obj.results[0]
 
     @classmethod
     def class_url(cls) -> str:
@@ -194,11 +203,9 @@ class GetOrCreateAPIResourceMixin:
         or creates it using the `data` key."""
         obj = cls.get(params=params, logger=logger)
 
-        if len(obj.results) > 1:
-            raise ValueError("Got more than one object back from request.")
-        elif len(obj.results) < 1:
-            logger.debug("Got no results back from request, creating.")
-            return cls.create(data=data, logger=logger).results
+        if obj is None:
+            logger.debug("[get_or_create] Got no results back from request, creating.")
+            return cls.create(data=data, logger=logger).data
         else:
             # It existed so we only return that one.
-            return obj.results[0]
+            return obj
