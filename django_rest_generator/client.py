@@ -183,6 +183,9 @@ class APIClient(metaclass=ABCMeta):
                 cls,
                 objectId: Union[str, int] = None,
                 params: Optional[TParams] = None,
+                logger: Optional[logging.Logger] = logging.getLogger(
+                    f"{__name__}.dynamic_action.{custom_endpoint}.{endpoint_operation.method}"
+                ),
                 *args,
                 **kwargs,
             ) -> APIResponse:
@@ -200,6 +203,9 @@ class APIClient(metaclass=ABCMeta):
                 base_url = base_url[:-1] if base_url[-1] == "/" else base_url
 
                 url = f"{base_url}/{endpoint}"
+                logger.debug(
+                    f"[DynamicAction:{sanitize_endpoint_to_method_name(custom_endpoint)}] Making a {method} request to {url} with parameters {params}."
+                )
                 return cls.make_request(method, *args, url=url, params=params, **kwargs)
 
         setattr(
