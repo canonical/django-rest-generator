@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from dataclasses import dataclass, fields, asdict
+from dataclasses import dataclass, fields, asdict, field
 from typing import List, Union
 from django_rest_generator.types import TRequestMethods
 from django_rest_generator.utils import match_to_openapi_path_spec
@@ -56,7 +56,14 @@ class Resource(CommonDataclass):
 
     def get_schema(self, path, method) -> Union[str, None]:
         for endpoint in self.endpoints:
+            print(endpoint.path, path)
             if match_to_openapi_path_spec(endpoint.path, path):
                 for ops in endpoint.operations:
                     if ops.method == method:
                         return ops.return_type
+
+
+@dataclass
+class Metadata(CommonDataclass):
+    resource: Resource
+    schema: Schema

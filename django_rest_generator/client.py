@@ -52,7 +52,7 @@ from .resource import APIResource
 from .exceptions import APIClientException
 from .types import TRequestMethods, THeaders, TParams
 from django_rest_generator.parser import OpenAPISpec
-from django_rest_generator.parser.models import Resource
+from django_rest_generator.parser.models import Resource, Schema, Metadata
 
 
 class APIClient(metaclass=ABCMeta):
@@ -128,7 +128,7 @@ class APIClient(metaclass=ABCMeta):
         self,
         method: TRequestMethods,
         url: str,
-        return_schema: str,
+        return_schema: Schema,
         *args,
         **kwargs,
     ) -> APIResponse:
@@ -137,7 +137,7 @@ class APIClient(metaclass=ABCMeta):
         """
         full_url = f"{self._server_url}/{url}"
         response: requests.Response = None
-        return_schema = self.__schemas.get(return_schema, None)
+        # return_schema = self.__schemas.get(return_schema, None)
         try:
             response = self.__session.request(
                 method=method, url=full_url, *args, **kwargs
@@ -216,7 +216,7 @@ class APIClient(metaclass=ABCMeta):
         delattr(DynamicCustomAction, "_run")
         return DynamicCustomAction
 
-    def _build_resource_object(self, resource: Resource):
+    def _build_resource_object(self, resource: Resource, resource_schema: Schema):
         """
         TODO: make this custom action augment the `operation` class with the mixins
         so we pass the context all the way thru.
@@ -261,8 +261,9 @@ class APIClient(metaclass=ABCMeta):
                         is_detail_action(endpoint.path),
                     )
                 )
+        resource_metadata = Metadata(resource=resource, schema=resource_schema)
         resource_class = self._make_resource_class(
-            custom_actions, resource_mixins, metadata=resource
+            custom_actions, resource_mixins, metadata=resource_metadata
         )
 
         resource_class.OBJECT_NAME = f"{self._server_api_base}{resource.name}"
@@ -274,12 +275,11 @@ class APIClient(metaclass=ABCMeta):
             schema = schema_file
 
         spec = OpenAPISpec.parse(schema, self._server_api_base)
-        resources = spec.resources
         self.__schemas = spec.schemas
         # TODO: link these schemas with request/response cycle in order to set them on return.
-
-        for resource in resources:
-            resource_class = self._build_resource_object(resource)
+        for resource in spec.resources:
+            resource_schema = spec.schemas.get(resource.name.lower(), None)
+            resource_class = self._build_resource_object(resource, resource_schema)
             self.register_resource(resource.name, resource_class)
 
     @classmethod

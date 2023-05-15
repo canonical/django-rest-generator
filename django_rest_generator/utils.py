@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import re
+from dataclasses import make_dataclass
 
 
 def sanitize_endpoint_to_method_name(endpoint):
@@ -77,3 +78,21 @@ def match_to_openapi_path_spec(openapi_path, request_path) -> bool:
     substitutions = {x: matches.group(x) for x in keywords}
     model = openapi_path.format(**substitutions)
     return model == request_path
+
+
+def schema_to_dataclass(schema_name, schema, dataclass_base):
+    conversion_table = {
+        "array": list,
+        "string": str,
+        "boolean": bool,
+        "integer": int,
+        "number": float,
+        "object": object,
+    }
+
+    data_class_fields = [
+        (field_name, conversion_table[field_data["type"]])
+        for field_name, field_data in schema.get("properties", {}).items()
+    ]
+    data_class = make_dataclass(schema_name, data_class_fields, bases=(dataclass_base,))
+    return data_class

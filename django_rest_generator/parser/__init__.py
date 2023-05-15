@@ -14,9 +14,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from dataclasses import dataclass, make_dataclass
-from typing import List, Any
-from prance import ResolvingParser
-from prance.util.resolver import RESOLVE_HTTP, RESOLVE_FILES
+from typing import List, Dict
+from prance import ResolvingParser, BaseParser
+from prance.util.resolver import RESOLVE_HTTP, RESOLVE_FILES, RESOLVE_INTERNAL
 from collections import defaultdict
 from django_rest_generator.parser.models import (
     Schema,
@@ -25,7 +25,7 @@ from django_rest_generator.parser.models import (
     Endpoint,
     Resource,
 )
-from django_rest_generator.utils import find_nested_keys
+from django_rest_generator.utils import find_nested_keys, schema_to_dataclass
 
 
 def _build_resource_objects(raw_resources: dict) -> List[Resource]:
@@ -49,22 +49,30 @@ def _parse_resource_objects_from_openapi(
     for path_url, operations in specification["paths"].items():
         path_base = path_url.strip().replace(f"/{server_base}", "")
         path_methods = []
-        for path_method_name, path_method_data in operations.items():
-            path_schema = set(
-                find_nested_keys(
-                    list(find_nested_keys(path_method_data["responses"], "schema")),
-                    "$ref",
-                )
-            )
-            path_schema = path_schema.pop().split("/")[-1] if path_schema else None
-            endpoint_op = EndpointOperation(
-                return_type=path_schema, method=path_method_name.upper()
-            )
-            path_methods.append(endpoint_op)
 
         resource, endpoint = path_base.split("/", maxsplit=1)
         if endpoint == "":
             endpoint = "/"
+
+        for path_method_name, path_method_data in operations.items():
+            # path_schema = set(
+            #     find_nested_keys(
+            #         list(find_nested_keys(path_method_data["responses"], "schema")),
+            #         "$ref",
+            #     )
+            # )
+            path_schema = list(
+                find_nested_keys(path_method_data["responses"], "schema")
+            )
+            path_schema = path_schema.pop() if path_schema else dict()
+            path_schema_class = schema_to_dataclass(
+                f"{resource}@{endpoint}", path_schema, CommonDataclass
+            )
+            path_schema = path_schema_class(**path_schema.get("properties", {}))
+            endpoint_op = EndpointOperation(
+                return_type=path_schema, method=path_method_name.upper()
+            )
+            path_methods.append(endpoint_op)
 
         resources[resource][endpoint].extend(path_methods)
 
@@ -73,7 +81,7 @@ def _parse_resource_objects_from_openapi(
 
 @dataclass
 class OpenAPISpec:
-    schemas: List[Schema]
+    schemas: Dict[str, Schema]
     resources: List[Resource]
 
     @staticmethod
@@ -108,13 +116,16 @@ class OpenAPISpec:
             data_class = make_dataclass(
                 schema_name, data_class_fields, bases=(CommonDataclass,)
             )
-            schemas[schema_name] = data_class
+            schemas[schema_name.lower()] = data_class
 
         return schemas
 
     @classmethod
     def parse(cls, schema, server_base):
-        parser = ResolvingParser(schema, resolve_types=RESOLVE_HTTP | RESOLVE_FILES)
+        parser = ResolvingParser(
+            schema, resolve_types=RESOLVE_HTTP | RESOLVE_FILES | RESOLVE_INTERNAL
+        )
+        # parser = BaseParser(schema,lazy=False)
         spec = parser.specification
         schemas = cls._parse_schemas_from_spec(spec)
         resources = cls._parse_resources_from_openapi(spec, server_base)

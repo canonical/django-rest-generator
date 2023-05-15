@@ -42,6 +42,7 @@ class APIResponse(object):
 
     def _handle_json_response(self) -> None:
         self.data = self._response.json()
+        print(self._schema)
         if self._schema is not None:
             self.data = self._schema.from_dict(self.data)
 
