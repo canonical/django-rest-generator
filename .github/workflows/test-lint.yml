@@ -43,7 +43,7 @@ jobs:
           with:
             name: coverage
         - name: Report Coverage and annotate PR (if exists) 
-          uses: orgoro/coverage@v2
+          uses: orgoro/coverage@v3
           with:
               coverageFile: .coverage.xml
               token: ${{ secrets.GITHUB_TOKEN }}
