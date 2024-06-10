@@ -31,7 +31,7 @@ dynamic = ["version"]
 
 dependencies = [
     "requests==2.31.0",
-    "prance==0.22.11.4.0",
+    "prance==23.6.21.0",
     "openapi-spec-validator==0.5.1"
 ]
 
