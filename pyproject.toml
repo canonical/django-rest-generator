@@ -30,7 +30,7 @@ requires-python = ">=3.9"
 dynamic = ["version"]
 
 dependencies = [
-    "requests==2.31.0",
+    "requests==2.32.2",
     "prance==23.6.21.0",
     "openapi-spec-validator==0.7.1"
 ]
