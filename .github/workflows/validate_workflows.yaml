@@ -13,7 +13,7 @@ jobs:
     name: Workflow validation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
+      - name: Checkout Django Rest Generator Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
@@ -30,7 +30,7 @@ jobs:
     name: Workflow vulnerability scanning
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout weebl
+      - name: Checkout Django Rest Generator Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
