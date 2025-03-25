@@ -1,0 +1,48 @@
+name: Workflow validation
+
+permissions:
+  contents: read
+
+on:
+  push:
+    paths:
+      - '.github/workflows/*'
+
+jobs:
+  workflow_validation:
+    name: Workflow validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install action-validator with asdf
+        uses: asdf-vm/actions/install@05e0d2ed97b598bfce82fd30daf324ae0c4570e6
+        with:
+          tool_versions: |
+            action-validator 0.6.0
+      - name: Lint Actions
+        run: |
+          find .github/workflows -type f \( -iname \*.yaml -o -iname \*.yml \) \
+            | xargs -I {} action-validator --verbose {}
+  workflow_vulnerability_scan:
+    name: Workflow vulnerability scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout weebl
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install zizmor from crates.io
+        uses: baptiste0928/cargo-install@91c5da15570085bcde6f4d7aed98cb82d6769fd3
+        with:
+          crate: zizmor
+          version: '1.4.1'
+      - name: Scan all workflows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          zizmor --pedantic $(ls .github/workflows/*.{yaml,yml})
+
+#Source https://github.com/canonical/checkbox/blob/b2c8db3588a8eea76150df3870f6b0ddee0cd866/.github/workflows/validate_workflows.yaml
