@@ -20,7 +20,7 @@ jobs:
       with:
         persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38
+      uses: actions/setup-python@6ed2c67c8abe7646815dbd50364eea862d396fd9
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
