@@ -16,7 +16,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+    - uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       with:
         persist-credentials: false
     - name: Set up Python ${{ matrix.python-version }}
@@ -62,7 +62,7 @@ jobs:
   license:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+    - uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       with:
         persist-credentials: false
     - name: License Eye Header Check
