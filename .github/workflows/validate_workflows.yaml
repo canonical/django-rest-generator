@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Django Rest Generator Repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
         with:
           persist-credentials: false
       - name: Install action-validator with asdf
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Django Rest Generator Repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
         with:
           persist-credentials: false
       - name: Install zizmor from crates.io
