@@ -66,4 +66,4 @@ jobs:
       with:
         persist-credentials: false
     - name: License Eye Header Check
-      uses: apache/skywalking-eyes/header@5c5b974209f0de5d905f37deb69369068ebfc15c
+      uses: apache/skywalking-eyes/header@a62f574f0eb113e306a860014d7ce38aea00f78d
