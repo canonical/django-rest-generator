@@ -16,7 +16,7 @@
 from dataclasses import dataclass, make_dataclass
 from typing import List, Any
 from prance import ResolvingParser
-from prance.util.resolver import RESOLVE_HTTP, RESOLVE_FILES
+from prance.util.resolver import RESOLVE_HTTP, RESOLVE_FILES, RESOLVE_INTERNAL
 from collections import defaultdict
 from django_rest_generator.parser.models import (
     Schema,
@@ -114,7 +114,7 @@ class OpenAPISpec:
 
     @classmethod
     def parse(cls, schema, server_base):
-        parser = ResolvingParser(schema, resolve_types=RESOLVE_HTTP | RESOLVE_FILES)
+        parser = ResolvingParser(schema, resolve_types=RESOLVE_HTTP | RESOLVE_FILES | RESOLVE_INTERNAL)
         spec = parser.specification
         schemas = cls._parse_schemas_from_spec(spec)
         resources = cls._parse_resources_from_openapi(spec, server_base)
