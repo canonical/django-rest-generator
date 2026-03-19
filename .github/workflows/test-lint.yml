@@ -36,13 +36,13 @@ jobs:
     - name: Upload artifact, Debug for copilot
       run: |
         echo "Current dir: $(pwd)"
-        echo "Github workspace: $${ GITHUB_WORKSPACE }}"
+        echo "Github workspace: ${GITHUB_WORKSPACE}"
         echo "Output of ls -la ./.coverage.xml:"
         ls -la ./.coverage.xml
     - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
       with:
         name: coverage-${{ matrix.python-version }}
-        path: "${{ GITHUB_WORKSPACE }}/.coverage.xml"
+        path: "${{ github.workspace }}/.coverage.xml"
 
   report-coverage:
       runs-on: ubuntu-latest
