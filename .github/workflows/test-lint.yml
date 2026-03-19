@@ -41,7 +41,8 @@ jobs:
       run: |
         ls -lart
         echo
-        echo $(pwd)
+        echo Current dir: $(pwd)
+        echo Github workspace: $GITHUB_WORKSPACE
 
   report-coverage:
       runs-on: ubuntu-latest
