@@ -70,7 +70,7 @@ class APIClient(metaclass=ABCMeta):
         token: str,
         certificate: str = None,
         logger: logging.Logger = None,
-        verify_return_type: bool = True
+        verify_return_type: bool = True,
     ):
         self.__token = token
         self.__certificate = certificate
@@ -275,7 +275,9 @@ class APIClient(metaclass=ABCMeta):
         if schema_file is not None:
             schema = schema_file
 
-        spec = OpenAPISpec.parse(schema, self._server_api_base, verify_return_type=self.__verify_return_type)
+        spec = OpenAPISpec.parse(
+            schema, self._server_api_base, verify_return_type=self.__verify_return_type
+        )
         resources = spec.resources
         self.__schemas = spec.schemas
         # TODO: link these schemas with request/response cycle in order to set them on return.
