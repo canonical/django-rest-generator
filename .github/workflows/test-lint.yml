@@ -33,11 +33,12 @@ jobs:
     - name: Run the test suite
       run: |
         make test
-    - name: "Upload artifact: Debug for copilot"
+    - name: Upload artifact, Debug for copilot
       run: |
         echo "Current dir: $(pwd)"
         echo "Github workspace: $GITHUB_WORKSPACE"
-        echo "Output of \"ls -la ./.coverage.xml\": $(ls -la ./.coverage.xml)"
+        echo "Output of ls -la ./.coverage.xml:"
+        ls -la ./.coverage.xml
     - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
       with:
         name: coverage-${{ matrix.python-version }}
