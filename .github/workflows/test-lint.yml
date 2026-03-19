@@ -37,6 +37,11 @@ jobs:
       with:
         name: coverage-${{ matrix.python-version }}
         path: .coverage.xml
+    - name: DEBUG
+      run: |
+        ls -lart
+        echo
+        echo $(pwd)
 
   report-coverage:
       runs-on: ubuntu-latest
