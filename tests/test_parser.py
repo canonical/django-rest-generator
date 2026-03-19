@@ -47,6 +47,20 @@ def test_resource_model_get_schema():
     assert users_resource.get_schema("12/", "PUT") == "User"
 
 
+def test_resource_model_get_schema_with_return_type_verification_disabled():
+    # For backwards compatibility with versions of the library prior to fixing
+    # issue #53.  It does require users of the library to explicitly add
+    # verify_return_type=False to opt in to the previous behavior, since
+    # normally you would want this validation to be turned on.
+    schema = OpenAPISpec.parse(
+        "tests/data/open-api-schema.yaml", "api/v2/", verify_return_type=False
+    )
+    users_resource = schema.resources[0]
+    assert users_resource.get_schema("me/", "GET") == None
+    assert users_resource.get_schema("i/dont/exists", "POST") == None
+    assert users_resource.get_schema("12/", "PUT") == None
+
+
 def test_parser_no_schemas(capsys):
     empty_test_schema = {"components": {"schemas": {}}}
 
