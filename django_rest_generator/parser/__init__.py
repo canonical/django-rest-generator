@@ -15,8 +15,7 @@
 
 from dataclasses import dataclass, make_dataclass
 from typing import List, Any
-from prance import ResolvingParser
-from prance.util.resolver import RESOLVE_HTTP, RESOLVE_FILES
+from prance import BaseParser
 from collections import defaultdict
 from django_rest_generator.parser.models import (
     Schema,
@@ -113,9 +112,28 @@ class OpenAPISpec:
         return schemas
 
     @classmethod
-    def parse(cls, schema, server_base):
-        parser = ResolvingParser(schema, resolve_types=RESOLVE_HTTP | RESOLVE_FILES)
+    def parse(cls, schema, server_base, verify_return_type=True):
+        parser = BaseParser(schema)
         spec = parser.specification
         schemas = cls._parse_schemas_from_spec(spec)
         resources = cls._parse_resources_from_openapi(spec, server_base)
+        if not verify_return_type:
+            # Issue #53 caused issues resolving the return_type, resulting in
+            # existing clients working without conversions via the expected
+            # schema types.  The fix may cause clients which previously "worked"
+            # to now fail because of such conversions being imposed.
+            #
+            # See APIResponse._handle_json_response in response.py; it performs
+            # a conversion if the schema is set, and this would result in
+            # errors in case of e.g. mismatches between the OpenAPI spec and the
+            # observed return value from the remote API.
+            #
+            # Typically we would *want* to have such errors due to violation of
+            # the spec, but in case of clients which depended on the old
+            # behavior, verify_return_type=False will "zero-out" the operation
+            # return types so things will work as they did before.
+            for resource in resources:
+                for endpoint in resource.endpoints:
+                    for operation in endpoint.operations:
+                        operation.return_type = None
         return cls(schemas=schemas, resources=resources)
